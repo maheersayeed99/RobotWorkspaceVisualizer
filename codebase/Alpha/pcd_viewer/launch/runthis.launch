@@ -1,0 +1,9 @@
+<launch>
+    <arg name="pcd_path" default="/home/yuelin/catkin_ws/src/pcd_viewer/data/example.pcd" doc="Input path to pcd file"/>
+    <param name="/pcd_path" value="$(arg pcd_path)"/>
+
+    <node name="pcd_viewer" type="pcd_viewer" pkg="pcd_viewer"/>
+
+    <node name="rviz" type="rviz" pkg="rviz" args="-d $(find pcd_viewer)/rviz/rviz.rviz" />
+
+</launch>
