@@ -10,9 +10,11 @@ add_subdirectory(../../../../public/src ${CMAKE_BINARY_DIR}/public)
 
 target_include_directories(fssimplewindow PUBLIC ${HEADER_PATH})
 target_include_directories(ysclass PUBLIC ${HEADER_PATH})
+target_include_directories(ysbitmapfont PUBLIC ${HEADER_PATH})
 
 
 add_executable(pcdSaver MACOSX_BUNDLE main.cpp)
 
 target_link_libraries(pcdSaver fssimplewindow)
 target_link_libraries(pcdSaver ysclass)
+target_link_libraries(pcdSaver ysbitmapfont)

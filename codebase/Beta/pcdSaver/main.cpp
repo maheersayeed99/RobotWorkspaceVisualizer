@@ -9,6 +9,7 @@
 
 #include <fssimplewindow.h>
 #include "ysclass.h"
+#include <ysglfontdata.h>
 
 //using namespace std;
 
@@ -20,7 +21,7 @@ public:
     int numP;
     float x, y, z;
     std::vector<float> xvec, yvec, zvec;
-    std::vector<float> vtx;
+    std::vector<float> vtx , col;
 
     bool term = false;
 
@@ -41,6 +42,14 @@ public:
     void boundingBox(double minmax[2][3], const std::vector <float>& vtx);
     void ResetViewDistance();
     bool terminateStep();
+
+
+
+    //draw
+
+    void drawMenu(int val, int wid, int hei, int type);
+
+
 };
 
 
@@ -58,22 +67,56 @@ pcd::pcd(){
 void pcd::makePCD(int numPoints) {
     numP = numPoints;
     float theta, phi, rho;
-
+    
     for (int i = 0; i < numPoints; ++i) {
 
-        theta = ((rand() % 628) / 100.0);
-        phi = ((rand() % 628) / 100.0);
-        rho = ((rand() % 200) / 100.0) - 1;
-        rho = rho;
-        /*
+        //theta = ((rand() % 628) / 100.0);
+        //phi = ((rand() % 628) / 100.0);
+
+        if (i < numPoints / 3) {
+            rho = 1;
+
+            col.push_back(1);
+            col.push_back(1);
+            col.push_back(0);
+            col.push_back(1);
+
+        }
+        else if (i < 2 * numPoints / 3) {
+            rho = 2;
+
+            col.push_back(1);
+            col.push_back(0);
+            col.push_back(1);
+            col.push_back(1);
+        }
+        else {
+            rho = 3;
+
+            col.push_back(0);
+            col.push_back(1);
+            col.push_back(1);
+            col.push_back(1);
+        }
+
+
+        //rho = ((rand() % 200) / 100.0) - 1;
+        //rho = rho;
+        
         x = ((rand() % 200) / 100.0) - 1;
         y = ((rand() % 200) / 100.0) - 1;
         z = ((rand() % 200) / 100.0) - 1;
-        */
+        
+        x *= rho;
+        y *= rho;
+        z *= rho;
 
-        x = rho * sin(phi) * cos(theta);
-        y = rho * sin(phi) * sin(theta);
-        z = rho * cos(phi);
+        //x = rho * sin(phi) * cos(theta);
+        //y = rho * sin(phi) * sin(theta);
+        //z = rho * cos(phi);
+
+
+
 
 
         //x = ((rand() % 200) / 100.0) - 1;
@@ -81,15 +124,19 @@ void pcd::makePCD(int numPoints) {
         //z = ((rand() % 200) / 100.0) - 1;
 
 
-        xvec.push_back(x);
-        yvec.push_back(y);
-        zvec.push_back(z);
+        //xvec.push_back(x);
+        //yvec.push_back(y);
+        //zvec.push_back(z);
 
 
 
         vtx.push_back(x);
         vtx.push_back(y);
         vtx.push_back(z);
+
+        
+
+
     }
 
 }
@@ -181,7 +228,41 @@ void pcd::ResetViewDistance(void)
 }
 
 
+void pcd::drawMenu(int val, int wid, int hei, int type) {
 
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(-wid/2.0, wid/2.0, hei/2.0, -hei/2.0);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    										// Change Color to Red
+
+    char str[256];
+
+    if (type == 1) {
+        glColor3ub(255, 0, 0);
+        glRasterPos2i((-wid / 2 + 30), (-hei / 2 + 50 +(60 * (val))));										// position FPS draw									// define character arraw for drawing fps on screen
+        sprintf(str, "Link %d", val+1);							// Make String
+    }
+    else if (type == 0) {
+        glColor3ub(0, 0, 255);
+        glRasterPos2i((-wid / 2 + 150), (-hei / 2 + 50+ (60 * (val))));										// position FPS draw										// define character arraw for drawing fps on screen
+        sprintf(str, "Joint %d", val+1);							// Make String
+    }
+    
+    YsGlDrawFontBitmap12x16(str);							// Draw String
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+
+}
 
 
 
@@ -199,10 +280,11 @@ void pcd::drawPCD() {
     int wid, hei;
     FsGetWindowSize(wid, hei);								// get window size
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// clear screen
+    
 
-    glEnable(GL_DEPTH_TEST);								// ?
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// clear screen and depth values
+    glClearColor(0, 0, 0, 0);
+    glEnable(GL_DEPTH_TEST);								// enables depth buffer
 
     glMatrixMode(GL_PROJECTION);							// ?					
     glLoadIdentity();										// ?
@@ -214,11 +296,11 @@ void pcd::drawPCD() {
 
     // This is the correct timing to set up a head light (a light moves with the view point) >>
     // Also the light needs to be normalized.
-    GLfloat lightDir[] = { 0,1 / sqrt(2.0f),1 / sqrt(2.0f),0 };
-    glLightfv(GL_LIGHT0, GL_POSITION, lightDir);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_COLOR_MATERIAL);
+    //GLfloat lightDir[] = { 0,1 / sqrt(2.0f),1 / sqrt(2.0f),0 };
+    //glLightfv(GL_LIGHT0, GL_POSITION, lightDir);
+    //glEnable(GL_LIGHTING);
+    //glEnable(GL_LIGHT0);
+    //glEnable(GL_COLOR_MATERIAL);
     // This is the correct timing to set up a head light (a light moves with the view point) <<
 
 
@@ -242,9 +324,9 @@ void pcd::drawPCD() {
     glMultMatrixd(modelViewGL);
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    //glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
     //glEnableClientState(GL_NORMAL_ARRAY);
-    //glColorPointer(4, GL_FLOAT, 0, col.data());
+    glColorPointer(4, GL_FLOAT, 0, col.data());
     glVertexPointer(3, GL_FLOAT, 0, vtx.data());
     //glNormalPointer(GL_FLOAT, 0, nom.data());
     //glDrawArrays(GL_TRIANGLES, 0, vtx.size() / 3);
@@ -252,10 +334,22 @@ void pcd::drawPCD() {
 
     glPointSize(2.0);
 
-    glDrawArrays(GL_POINTS, 0, vtx.size() / 3);
+    glDrawArrays(GL_POINTS, 0, vtx.size()/3);
     //glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
-    //glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+
+
+    for (int i = 0; i < 7; ++i) {
+        drawMenu(i, wid, hei, 1);
+        if (i < 6) {
+            drawMenu(i, wid, hei, 0);
+        }
+    }
+    
+    
+
 
     FsSwapBuffers();
     FsSleep(25);
@@ -309,7 +403,6 @@ void pcd::RunOneStep() {
 
 bool pcd::terminateStep() {
     return term;
-
 }
 
 
@@ -326,7 +419,7 @@ int main(int argc, char* argv[])
     
     srand(time(NULL));
     
-    FsOpenWindow(0, 0, 800, 600, 1);
+    FsOpenWindow(0, 0, 1200, 600, 1);
     pcd newPCD;
     newPCD.makePCD(numPoints);
     newPCD.ResetViewDistance();
