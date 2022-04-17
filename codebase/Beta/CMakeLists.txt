@@ -11,8 +11,19 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
 )
 
+add_subdirectory(../../../public/src ${CMAKE_BINARY_DIR}/public)
+add_subdirectory(../../../MMLPlayer/ym2612 ${CMAKE_BINARY_DIR}/ym2612)
+add_subdirectory(../../../MMLPlayer/mmlplayer ${CMAKE_BINARY_DIR}/mmlplayer)
+
+
 add_library(robot include/Robot.h include/Robot.cpp)
 target_link_libraries(robot Eigen3::Eigen)
 
 add_executable(find_ws MACOSX_BUNDLE src/main.cpp)
 target_link_libraries(find_ws robot)
+target_link_libraries(find_ws fssimplewindow)
+target_link_libraries(find_ws ysclass)
+target_link_libraries(find_ws ysbitmapfont)
+
+enable_testing()
+add_subdirectory(tests)
