@@ -40,15 +40,16 @@ ApplicationMain::ApplicationMain() {
                                            temp, temp, temp, temp};
   robot.get_workspace(configs, 8);
   robot.print_map(robot.point_cloud_);
-
+  // TODO: Use real point cloud here
   robot.makePCD(5000);
+  // TODO: Find a way to convert robot.point_cloud_ to vtx and col
   vtx = robot.vtx;
   col = robot.col;
 
   viewTarget = YsVec3::Origin();
   lastT = std::chrono::high_resolution_clock::now();
-
   ResetViewDistance();
+
   robot.savePCD("newTest.pcd");
 }
 
