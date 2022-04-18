@@ -15,6 +15,86 @@
 
 const double PI = 3.14159276;
 
+class button {
+ public:
+  float x, y, wid, hei, xoff, yoff;
+  int val;
+  int colorRed[3] = {200, 70, 70};
+  int colorBlue[3] = {100, 100, 255};
+  int colorWhite[3] = {255, 255, 255};
+  char type;
+  bool hover;
+
+  button(float x1, float y1, int val1, char type1) {
+    x = x1;
+    y = y1;
+    val = val1;
+    wid = 100;
+    hei = 40;
+    xoff = 10;
+    yoff = -10;
+    type = type1;
+  }
+
+  void draw();
+  bool isInButton(int x, int y);
+  bool checkInButton(float x, float y);
+};
+
+void button::draw() {
+  char str[256];
+
+  if (type == 'l') {
+    glColor3ub(0, 0, 0);
+    glRasterPos2i(x + xoff, y + yoff);
+    sprintf(str, "Link %d", val);
+    YsGlDrawFontBitmap12x16(str);
+
+    glBegin(GL_QUADS);
+
+    if (hover) {
+      glColor3ub(colorWhite[0], colorWhite[1], colorWhite[2]);
+    } else {
+      glColor3ub(colorRed[0], colorRed[1], colorRed[2]);
+    }
+    glVertex2f(x, y);
+    glVertex2f(x + wid, y);
+    glVertex2f(x + wid, y - hei);
+    glVertex2f(x, y - hei);
+
+    glEnd();
+
+  } else if (type == 'j') {
+    glColor3ub(0, 0, 0);
+    glRasterPos2i(x + xoff, y + yoff);
+    sprintf(str, "Joint %d", val);
+    YsGlDrawFontBitmap12x16(str);
+
+    glBegin(GL_QUADS);
+
+    if (hover) {
+      glColor3ub(colorWhite[0], colorWhite[1], colorWhite[2]);
+    } else {
+      glColor3ub(colorBlue[0], colorBlue[1], colorBlue[2]);
+    }
+    glVertex2f(x, y);
+    glVertex2f(x + wid, y);
+    glVertex2f(x + wid, y - hei);
+    glVertex2f(x, y - hei);
+
+    glEnd();
+  }
+}
+
+bool button::isInButton(int x1, int y1) {
+  if ((x1 > x) && (x1 < x + wid)) {
+    if ((y1 < y) && (y1 > y + hei)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 class pcd {
  public:
   float rgb = 4.808e+06;
@@ -33,7 +113,14 @@ class pcd {
 
   decltype(std::chrono::high_resolution_clock::now()) lastT;
 
-  pcd();
+  std::vector<button*> linkVec;
+  std::vector<button*> jointVec;
+
+  pcd() {
+    viewTarget = YsVec3::Origin();
+    lastT = std::chrono::high_resolution_clock::now();
+  }
+
   void makePCD(int numPoints);
   void savePCD(std::string fileName);
   void drawPCD();
@@ -42,14 +129,28 @@ class pcd {
   void ResetViewDistance();
   bool terminateStep();
 
+  void makeButtons(int links, int joints);
+
   // draw
 
   void drawMenu(int val, int wid, int hei, int type);
 };
 
-pcd::pcd() {
-  viewTarget = YsVec3::Origin();
-  lastT = std::chrono::high_resolution_clock::now();
+void pcd::makeButtons(int links, int joints) {
+  int wid, hei;
+  FsGetWindowSize(wid, hei);
+
+  for (int i = 0; i < links; ++i) {
+    button* currButton =
+        new button(-(wid / 2) + 10, -(hei / 2) + 60 + (60 * i), (i + 1), 'l');
+    linkVec.push_back(currButton);
+  }
+
+  for (int i = 0; i < joints; ++i) {
+    button* currButton =
+        new button(-(wid / 2) + 150, -(hei / 2) + 60 + (60 * i), (i + 1), 'j');
+    jointVec.push_back(currButton);
+  }
 }
 
 void pcd::makePCD(int numPoints) {
@@ -195,29 +296,36 @@ void pcd::drawMenu(int val, int wid, int hei, int type) {
   glPushMatrix();
   glLoadIdentity();
 
-  // Change Color to Red
+  for (button* currButton : linkVec) {
+    currButton->draw();
+  }
 
+  for (button* currButton : jointVec) {
+    currButton->draw();
+  }
+
+  /*
   char str[256];
 
   if (type == 1) {
-    glColor3ub(255, 0, 0);
-    glRasterPos2i(
-        (-wid / 2 + 30),
-        (-hei / 2 + 50 +
-         (60 * (val))));  // position FPS draw									//
-                          // define character arraw for drawing fps on screen
-    sprintf(str, "Link %d", val + 1);  // Make String
-  } else if (type == 0) {
-    glColor3ub(0, 0, 255);
-    glRasterPos2i(
-        (-wid / 2 + 150),
-        (-hei / 2 + 50 +
-         (60 * (val))));  // position FPS draw										//
-                          // define character arraw for drawing fps on screen
-    sprintf(str, "Joint %d", val + 1);  // Make String
+      glColor3ub(255, 0, 0);
+      glRasterPos2i((-wid / 2 + 30), (-hei / 2 + 50 +(60 * (val))));
+  // position FPS draw									//
+  define character arraw for drawing fps on screen sprintf(str, "Link %d",
+  val+1);							// Make String
+  }
+  else if (type == 0) {
+      glColor3ub(0, 0, 255);
+      glRasterPos2i((-wid / 2 + 150), (-hei / 2 + 50+ (60 * (val))));
+  // position FPS draw
+  // define character arraw for drawing fps on screen sprintf(str, "Joint %d",
+  val+1);							// Make String
   }
 
-  YsGlDrawFontBitmap12x16(str);  // Draw String
+  YsGlDrawFontBitmap12x16(str);							// Draw
+  String
+
+  */
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
@@ -347,8 +455,12 @@ int main(int argc, char* argv[]) {
   FsOpenWindow(0, 0, 1200, 600, 1);
   pcd newPCD;
   newPCD.makePCD(numPoints);
+  newPCD.makeButtons(7, 6);
   newPCD.ResetViewDistance();
   newPCD.savePCD("newTest.pcd");
+
+  std::cout << newPCD.linkVec.size() << "   " << newPCD.linkVec[0]->x
+            << std::endl;
 
   while (true != newPCD.terminateStep()) {
     FsPollDevice();
