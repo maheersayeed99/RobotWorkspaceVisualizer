@@ -16,7 +16,7 @@ add_subdirectory(../../../MMLPlayer/ym2612 ${CMAKE_BINARY_DIR}/ym2612)
 add_subdirectory(../../../MMLPlayer/mmlplayer ${CMAKE_BINARY_DIR}/mmlplayer)
 
 
-add_library(robot include/Robot.h include/Robot.cpp)
+add_library(robot include/Robot.h include/Robot.cpp include/getWS.cpp)
 target_link_libraries(robot Eigen3::Eigen)
 
 add_executable(find_ws MACOSX_BUNDLE src/main.cpp)

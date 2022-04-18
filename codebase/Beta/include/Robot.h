@@ -2,8 +2,34 @@
 #define ROBOT_IS_INCLUDED
 
 #include <Eigen/Dense>
+#include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <vector>
+#include <unordered_map>
+#include <stdio.h>
+#include <thread>
+#include <future>
+#include <condition_variable>
+#include <mutex>
+#include <functional>
+#include <string>
+
+// #include <pcl/io/pcd_io.h>  // include libraries
+// #include <pcl/point_types.h>
+
+// hashfunction for unordered_map
+struct hashFunction {
+  size_t operator()(const std::vector<double> &myVector) const {
+    std::hash<double> hasher;
+    size_t answer = 0;
+
+    for (int i : myVector) {
+      answer ^= hasher(i) + 0x9e3779b9 + (answer << 6) + (answer >> 2);
+    }
+    return answer;
+  }
+};
 
 class Robot {
  public:
@@ -34,6 +60,7 @@ class Robot {
   and idx_end is end-effector); dim2 = joints.size() return: a 2d vector 1st dim
   - various configurations 2nd dim - xyz cooridnates
   */
+
   std::vector<std::vector<double>> forward_kinematics(
       std::vector<std::vector<double>> configs) const;
 
@@ -44,19 +71,28 @@ class Robot {
   */
   void get_workspace(std::vector<std::vector<double>> configs,
                      const int nThreads);
+  void save2map(std::vector<std::vector<double>> &pos,
+                std::vector<std::vector<double>> &configs);
 
   /* save2pcd
   read all the keys from the hashmap and store in pcd file
   */
   bool save2pcd(std::string filepath);
 
- private:
+  //  set as public for testing
+ public:
   std::vector<Joint> joints_;
-  // std::unordered_map<std::vector<double>,
-  //                    std::vector<std::vector<double>>>  // key: point cloud
-  //                                                       // coord, value:
-  //                                                       // configuration
-  //     point_cloud_;
+  std::unordered_map<std::vector<double>, std::vector<std::vector<double>>,
+                     hashFunction>
+      point_cloud_;
+
+  /*=====================Helper Functions====================*/
+ public:
+  void print_1dVec(std::vector<double> vec);
+  void print_2dVec(std::vector<std::vector<double>> vec);
+  void print_map(
+      std::unordered_map<std::vector<double>, std::vector<std::vector<double>>,
+                         hashFunction> const &m);
 };
 
 #endif
