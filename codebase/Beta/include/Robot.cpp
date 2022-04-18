@@ -3,18 +3,18 @@
 Robot::Robot() { ; }
 
 void Robot::print_1dVec(std::vector<double> vec) {
-  std::cout << " =========== vector.begin() ========= " << std::endl;
+  std::cout << " =========== vector begins ========= " << std::endl;
   std::cout << "[ ";
   for (int j = 0; j < vec.size(); ++j) {
     std::cout << vec[j] << " ";
   }
   std::cout << "] ";
   std::cout << std::endl;
-  std::cout << " ============ vector.end() ========== " << std::endl;
+  std::cout << " ============ vector ends ========== " << std::endl;
 }
 
 void Robot::print_2dVec(std::vector<std::vector<double>> vec) {
-  std::cout << " =========== vector.begin() ========= " << std::endl;
+  std::cout << " =========== vector begins ========= " << std::endl;
   for (int i = 0; i < vec.size(); ++i) {
     std::cout << "[ ";
     for (int j = 0; j < vec[i].size(); ++j) {
@@ -23,7 +23,7 @@ void Robot::print_2dVec(std::vector<std::vector<double>> vec) {
     std::cout << "] ";
     std::cout << std::endl;
   }
-  std::cout << " ============ vector.end() ========== " << std::endl;
+  std::cout << " ============ vector ends ========== " << std::endl;
 }
 
 void Robot::print_map(

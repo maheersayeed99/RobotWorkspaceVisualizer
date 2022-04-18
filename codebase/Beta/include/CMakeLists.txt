@@ -1,0 +1,5 @@
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+include_directories(${EIGEN3_INCLUDE_DIR})
+add_library(robot robot.h robot.cpp getWS.cpp)
+target_link_libraries(robot Eigen3::Eigen)
+target_include_directories(robot PUBLIC .)
