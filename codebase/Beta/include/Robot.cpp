@@ -32,6 +32,7 @@ void Robot::print_map(
   for (auto const &pair : m) {
     std::cout << "\nMap Key" << std::endl;
     print_1dVec(pair.first);
+
     std::cout << "Map Value" << std::endl;
     print_2dVec(pair.second);
     std::cout << std::endl;

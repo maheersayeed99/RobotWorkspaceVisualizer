@@ -141,9 +141,13 @@ class Robot {
       vtx.push_back(z);
     }
   };
+
+
+
+
   void savePCD(std::string fileName) {
     std::ofstream PCD;
-
+    
     PCD.open(fileName, std::fstream::out);
 
     if (PCD.fail()) {
@@ -161,11 +165,22 @@ class Robot {
       PCD << "POINTS " << numP << std::endl;
       PCD << "DATA ascii" << std::endl;
 
+
+      for (auto const& pair : point_cloud_) {
+
+
+          PCD <<(float)pair.first[0] << " " << (float)pair.first[1] << " " << (float)pair.first[2] << " " << rgb
+              << std::endl;
+      }
+
+      /*
       for (int i = 0; i < xvec.size(); ++i) {
-        PCD << xvec[i] << " " << yvec[i] << " " << zvec[i] << " " << rgb
+        PCD << point_cloud_[i] << " " << yvec[i] << " " << zvec[i] << " " << rgb
             << std::endl;
       }
 
+
+      */
       PCD.close();
 
       std::cout << "File saved as newTest.pcd" << std::endl;
