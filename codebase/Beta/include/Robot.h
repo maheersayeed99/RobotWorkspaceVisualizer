@@ -79,6 +79,7 @@ class Robot {
   read all the keys from the hashmap and store in pcd file
   */
   bool save2pcd(std::string filepath);
+  void savePCD(std::string fileName);
 
   //  set as public for testing
  public:
@@ -141,51 +142,6 @@ class Robot {
       vtx.push_back(z);
     }
   };
-
-
-
-
-  void savePCD(std::string fileName) {
-    std::ofstream PCD;
-    
-    PCD.open(fileName, std::fstream::out);
-
-    if (PCD.fail()) {
-      std::cout << "could not open" << std::endl;
-    }
-
-    else {
-      PCD << "FIELDS x y z rgb" << std::endl;
-      PCD << "SIZE 4 4 4 4" << std::endl;
-      PCD << "TYPE F F F F" << std::endl;
-      PCD << "COUNT 1 1 1 1" << std::endl;
-      PCD << "WIDTH " << numP << std::endl;
-      PCD << "HEIGHT 1" << std::endl;
-      PCD << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl;
-      PCD << "POINTS " << numP << std::endl;
-      PCD << "DATA ascii" << std::endl;
-
-
-      for (auto const& pair : point_cloud_) {
-
-
-          PCD <<(float)pair.first[0] << " " << (float)pair.first[1] << " " << (float)pair.first[2] << " " << rgb
-              << std::endl;
-      }
-
-      /*
-      for (int i = 0; i < xvec.size(); ++i) {
-        PCD << point_cloud_[i] << " " << yvec[i] << " " << zvec[i] << " " << rgb
-            << std::endl;
-      }
-
-
-      */
-      PCD.close();
-
-      std::cout << "File saved as newTest.pcd" << std::endl;
-    }
-  }
 };
 
 #endif
