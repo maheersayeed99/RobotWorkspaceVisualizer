@@ -29,6 +29,8 @@ int Robot::read_urdf(std::string fileName) {
   while (pListElement != nullptr) {
     Robot::Joint joint;
 
+    // TODO: Use default value if a non-crucial domain does not exist
+
     // ################# JOINT NAME & TYPE ################# //
     const char* name = nullptr;
     const char* type = nullptr;
@@ -97,9 +99,9 @@ int Robot::read_urdf(std::string fileName) {
     std::cout << "Joint type: " << joint.joint_type_ << std::endl;
     std::cout << "Joint parent: " << joint.parent_link_name_ << std::endl;
     std::cout << "Joint child: " << joint.child_link_name_ << std::endl;
-    std::cout << "Joint origin rpy: \n" << joint.origin_rpy_ << std::endl;
-    std::cout << "Joint origin xyz: \n" << joint.origin_xyz_ << std::endl;
-    std::cout << "Joint axis xyz: \n" << joint.axis_ << std::endl;
+    // std::cout << "Joint origin rpy: \n" << joint.origin_rpy_ << std::endl;
+    // std::cout << "Joint origin xyz: \n" << joint.origin_xyz_ << std::endl;
+    // std::cout << "Joint axis xyz: \n" << joint.axis_ << std::endl;
     std::cout << std::endl;
   }
   return 0;

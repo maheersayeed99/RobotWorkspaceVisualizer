@@ -24,7 +24,7 @@ class ApplicationMain {
   Robot robot;
 
  public:
-  ApplicationMain();
+  ApplicationMain(int argc, char* argv[]);
   bool MustTerminate(void) const;
   void RunOneStep(void);
   void Draw(void) const;
@@ -35,28 +35,33 @@ class ApplicationMain {
   decltype(std::chrono::high_resolution_clock::now()) lastT;
 };
 
-ApplicationMain::ApplicationMain() {
-  std::cout << "Loading URDF" << std::endl;
-  // TODO: Change from fixed name to arg input
-  int readurdf = robot.read_urdf("ur5.urdf");
-  std::cout << "Load URDF return: " << readurdf << std::endl;
+ApplicationMain::ApplicationMain(int argc, char* argv[]) {
+  if (2 == argc) {
+    if (argc == 2 && 0 == robot.read_urdf(argv[1])) {
+      std::cout << "Loading URDF" << std::endl;
 
-  std::vector<double> temp{0, 0, 0, 0, 0};
-  std::vector<std::vector<double>> configs{temp, temp, temp, temp,
-                                           temp, temp, temp, temp};
-  robot.get_workspace(configs, 8);
-  robot.print_map(robot.point_cloud_);
-  // TODO: Use real point cloud here
-  robot.makePCD(5000);
-  // TODO: Find a way to convert robot.point_cloud_ to vtx and col
-  vtx = robot.vtx;
-  col = robot.col;
+      std::vector<double> temp{0, 0, 0, 0, 0};
+      std::vector<std::vector<double>> configs{temp, temp, temp, temp,
+                                               temp, temp, temp, temp};
+      robot.get_workspace(configs, 8);
+      robot.print_map(robot.point_cloud_);
+      // TODO: Use real point cloud here
+      robot.makePCD(5000);
+      // TODO: Find a way to convert robot.point_cloud_ to vtx and col
+      vtx = robot.vtx;
+      col = robot.col;
 
-  viewTarget = YsVec3::Origin();
-  lastT = std::chrono::high_resolution_clock::now();
-  ResetViewDistance();
+      viewTarget = YsVec3::Origin();
+      lastT = std::chrono::high_resolution_clock::now();
+      ResetViewDistance();
 
-  robot.savePCD("newTest.pcd");
+      robot.savePCD("newTest.pcd");
+    } else {
+      std::cout << "Error: Failed to read a .urdf file." << std::endl;
+    }
+  } else {
+    std::cout << "Usage: find_ws urdfFile-Name.urdf" << std::endl;
+  }
 
   /*================ URDF ======================*/
 }
@@ -202,7 +207,7 @@ void ApplicationMain::ResetViewDistance(void) {
 
 int main(int argc, char* argv[]) {
   FsOpenWindow(0, 0, 800, 600, 1);
-  ApplicationMain app;
+  ApplicationMain app(argc, argv);
 
   while (true != app.MustTerminate()) {
     app.RunOneStep();
