@@ -1,4 +1,5 @@
 #include "Robot.h"
+
 #include <iostream>
 
 #include <chrono>
@@ -35,6 +36,11 @@ class ApplicationMain {
 };
 
 ApplicationMain::ApplicationMain() {
+  std::cout << "Loading URDF" << std::endl;
+  // TODO: Change from fixed name to arg input
+  int readurdf = robot.read_urdf("ur5.urdf");
+  std::cout << "Load URDF return: " << readurdf << std::endl;
+
   std::vector<double> temp{0, 0, 0, 0, 0};
   std::vector<std::vector<double>> configs{temp, temp, temp, temp,
                                            temp, temp, temp, temp};
@@ -51,6 +57,8 @@ ApplicationMain::ApplicationMain() {
   ResetViewDistance();
 
   robot.savePCD("newTest.pcd");
+
+  /*================ URDF ======================*/
 }
 
 void ApplicationMain::Draw(void) const {

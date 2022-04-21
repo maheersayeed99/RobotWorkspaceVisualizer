@@ -15,6 +15,15 @@
 #include <functional>
 #include <string>
 #include <fstream>
+#include "tinyxml2.h"
+
+#ifndef XMLCheckResult
+#define XMLCheckResult(a_eResult)           \
+  if (a_eResult != tinyxml2::XML_SUCCESS) { \
+    printf("Error: %i\n", a_eResult);       \
+    return a_eResult;                       \
+  }
+#endif
 
 // #include <pcl/io/pcd_io.h>  // include libraries
 // #include <pcl/point_types.h>
@@ -38,9 +47,11 @@ class Robot {
 
   class Joint {
     friend Robot;
-    typedef enum { revolute, prismatic } joint_type;
-    std::string frame_name_;
-    std::string parent_name_;
+    typedef enum { fixed, revolute, continuous, prismatic } joint_type;
+    joint_type joint_type_;
+    std::string joint_name_;
+    std::string child_link_name_;
+    std::string parent_link_name_;
     Eigen::Vector3d origin_xyz_;
     Eigen::Vector3d origin_rpy_;
     Eigen::Vector3d axis_;
@@ -51,7 +62,7 @@ class Robot {
   /* read_urdf
   populates a vector of Joint objects (already a class attribute): joints_
   */
-  bool read_urdf(std::string filepath);
+  int read_urdf(std::string filepath);
 
   /* forward_kinematics
   summary: the function takes in a batch of configurations and computes

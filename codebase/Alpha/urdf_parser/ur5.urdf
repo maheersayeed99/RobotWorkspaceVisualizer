@@ -1,0 +1,20 @@
+<robot name="ur5">
+
+    <joint name="world_joint" type="fixed">
+        <parent link="world"/>
+        <child link="base_link"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+         <axis xyz="0 0 0"/>
+    </joint>
+
+    <joint name="joint1" type="continuous">
+        <parent link="base_link"/>
+        <child link="link1"/>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.089159"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+</robot>
+
+
+
