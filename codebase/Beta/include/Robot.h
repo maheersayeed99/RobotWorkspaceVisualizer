@@ -76,7 +76,7 @@ class Robot {
   summary: the function takes in a vector of joint angle and computes the final
   position as a Eigen::Vector3d
   */
-  Eigen::Vector3d forward_kinematics(std::vector<double> joint_angle) const;
+  Eigen::Vector3d forward_kinematics_single(std::vector<double> joint_angle) const;
 
   /* forward_kinematics
   summary: the function takes in a batch of configurations and computes

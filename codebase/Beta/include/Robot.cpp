@@ -170,7 +170,7 @@ void Robot::savePCD(std::string fileName) {
   }
 }
 
-Eigen::Vector3d Robot::forward_kinematics(
+Eigen::Vector3d Robot::forward_kinematics_single(
     std::vector<double> joint_angle) const {
   std::vector<Eigen::Matrix4d> gsts;
 
