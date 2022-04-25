@@ -1,4 +1,29 @@
 #include "Robot.h"
+/*=====================Helper Functions====================*/
+// Utility functions
+Eigen::Matrix3d Robot::Euler_to_Rmatrix(Eigen::Vector3d rpy) const {
+  // assume axis is x_y_z
+  Eigen::Matrix3d RM;
+  double r = rpy(0);
+  double p = rpy(1);
+  double y = rpy(2);
+  RM << cos(r) * cos(p) * cos(y) - sin(r) * sin(y),
+      -cos(r) * cos(p) * sin(y) - sin(r) * cos(y), cos(r) * sin(p),
+      sin(r) * cos(p) * cos(y) + cos(r) * sin(y),
+      -sin(r) * cos(p) * sin(y) + cos(r) * cos(y), sin(r) * sin(p),
+      -sin(p) * cos(y), sin(p) * sin(y), cos(p);
+
+  return RM;
+}
+Eigen::Vector3d Robot::Rmatrix_to_Euler(Eigen::Matrix3d RM) const {
+  double p = acos(RM(8));  // acos of last element is p
+  // TODO: Fix this
+  double y = asin(RM(7) / sin(p));
+  double r = acos(RM(2) / sin(p));
+
+  Eigen::Vector3d rpy(r, p, y);
+  return rpy;
+}
 
 void string2vector3d(Eigen::Vector3d& vec, const char* stringPtr) {
   std::stringstream ss;
@@ -11,6 +36,7 @@ void string2vector3d(Eigen::Vector3d& vec, const char* stringPtr) {
   vec << tempx, tempy, tempz;
 }
 
+/*=====================Main code====================*/
 Robot::Robot() { ; }
 
 int Robot::read_urdf(std::string fileName) {
@@ -144,7 +170,85 @@ void Robot::savePCD(std::string fileName) {
   }
 }
 
-/*=====================Helper Functions====================*/
+Eigen::Vector3d Robot::forward_kinematics(
+    std::vector<double> joint_angle) const {
+  std::vector<Eigen::Matrix4d> gsts;
+
+  // tool and base frame transformation
+  Eigen::Vector3d tool_translate(0, 0, 0);
+
+  int angle_index = 0;
+  for (Joint next_joint : joints_) {
+    double angle = joint_angle.at(angle_index);
+    angle_index++;
+
+    // handle rotation rpy
+    Eigen::Matrix3d RMrpy = Euler_to_Rmatrix(next_joint.origin_rpy_);
+
+    // update tool-base frame transform
+    tool_translate = tool_translate + next_joint.origin_xyz_;
+
+    // translation vector v = -1*cross(w, q)
+    // w is axis, q is origin_xyz
+    Eigen::Vector3d v;
+    v = -1 * next_joint.axis_ * next_joint.origin_xyz_;
+    Eigen::Vector3d w;
+    w << next_joint.axis_ * RMrpy;
+
+    // fill twist hat vector
+    Eigen::Matrix4d twist_hat;
+    twist_hat << 0, -1 * w(2), w(1), v(0), w(2), 0, -1 * w(0), v(1), -1 * w(1),
+        w(0), 0;
+    v(2), 0, 0, 0, 0;
+
+    // initialize transformation matrix g_ij()
+    Eigen::Matrix4d transformation_matrix;
+
+    Eigen::Matrix4d twist_by_angle;
+    twist_by_angle = twist_hat * angle;
+
+    // g_ij = e ^ [twist_hat * theta]
+    transformation_matrix = twist_by_angle.exp();
+
+    // add to sequence of transforms
+    gsts.push_back(transformation_matrix);
+  }
+
+  // full matrix transform
+  Eigen::Matrix4d total_transform = gsts.at(0);
+
+  for (int j = 1; j < gsts.size(); j++) {
+    total_transform = total_transform * gsts.at(j);
+  }
+  // full matrix transform "total_transform" complete
+
+  // transformation between tool and base frame at theta=0
+  Eigen::Matrix4d gs0;
+  gs0 << 1, 0, 0, tool_translate(0), 0, 1, 0, tool_translate(1), 0, 0, 1,
+      tool_translate(2), 0, 0, 0, 1;
+
+  // TODO: tool_translate need to be a Vector4d
+  Eigen::Matrix4d toolFrame;
+  toolFrame = total_transform * tool_translate;
+
+  Eigen::Matrix3d finalRotation;
+  finalRotation << toolFrame(0), toolFrame(1), toolFrame(2), toolFrame(4),
+      toolFrame(5), toolFrame(6), toolFrame(8), toolFrame(9), toolFrame(10);
+
+  // FINAL POSITION
+  Eigen::Vector3d final_position(toolFrame(3), toolFrame(7), toolFrame(11));
+
+  // FINAL ROTATION AROUND axis_ = [1, 1, 1];
+  Eigen::Vector3d final_rotation;
+  final_rotation = Rmatrix_to_Euler(finalRotation);
+
+  // FINAL AXIS
+  Eigen::Vector3d final_axis(1, 1, 1);
+
+  return final_position;
+}
+
+// Testing only, do not use in final version
 void Robot::print_1dVec(std::vector<double> vec) {
   std::cout << " =========== vector begins ========= " << std::endl;
   std::cout << "[ ";
@@ -184,3 +288,46 @@ void Robot::print_map(
     // std::cout << "}\n";
   }
 }
+
+void Robot::makePCD(int numPoints) {
+  numP = numPoints;
+  float theta, phi, rho;
+  float x, y, z;
+  for (int i = 0; i < numPoints; ++i) {
+    if (i < numPoints / 3) {
+      rho = 1;
+
+      col.push_back(1);
+      col.push_back(1);
+      col.push_back(0);
+      col.push_back(1);
+
+    } else if (i < 2 * numPoints / 3) {
+      rho = 2;
+
+      col.push_back(1);
+      col.push_back(0);
+      col.push_back(1);
+      col.push_back(1);
+    } else {
+      rho = 3;
+
+      col.push_back(0);
+      col.push_back(1);
+      col.push_back(1);
+      col.push_back(1);
+    }
+
+    x = ((rand() % 200) / 100.0) - 1;
+    y = ((rand() % 200) / 100.0) - 1;
+    z = ((rand() % 200) / 100.0) - 1;
+
+    x *= rho;
+    y *= rho;
+    z *= rho;
+
+    vtx.push_back(x);
+    vtx.push_back(y);
+    vtx.push_back(z);
+  }
+};

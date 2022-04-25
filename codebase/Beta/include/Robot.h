@@ -2,6 +2,7 @@
 #define ROBOT_IS_INCLUDED
 
 #include <Eigen/Dense>
+#include <unsupported/Eigen/MatrixFunctions>
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -59,10 +60,23 @@ class Robot {
     double joint_limits_[2];
   };
 
+  /*=====================Helper Functions====================*/
+  // Utility functions
+ private:
+  Eigen::Matrix3d Euler_to_Rmatrix(Eigen::Vector3d rpy) const;
+  Eigen::Vector3d Rmatrix_to_Euler(Eigen::Matrix3d RM) const;
+
+ public:
   /* read_urdf
   populates a vector of Joint objects (already a class attribute): joints_
   */
   int read_urdf(std::string filepath);
+
+  /* forward_kinematics
+  summary: the function takes in a vector of joint angle and computes the final
+  position as a Eigen::Vector3d
+  */
+  Eigen::Vector3d forward_kinematics(std::vector<double> joint_angle) const;
 
   /* forward_kinematics
   summary: the function takes in a batch of configurations and computes
@@ -72,7 +86,6 @@ class Robot {
   and idx_end is end-effector); dim2 = joints.size() return: a 2d vector 1st dim
   - various configurations 2nd dim - xyz cooridnates
   */
-
   std::vector<std::vector<double>> forward_kinematics(
       std::vector<std::vector<double>> configs) const;
 
@@ -100,7 +113,7 @@ class Robot {
       point_cloud_;
 
   /*=====================Helper Functions====================*/
-  // Do not use in final version
+  // Testing only, do not use in final version
  public:
   void print_1dVec(std::vector<double> vec);
   void print_2dVec(std::vector<std::vector<double>> vec);
@@ -111,48 +124,7 @@ class Robot {
   float rgb = 4.808e+06;
   std::vector<float> xvec, yvec, zvec;
   std::vector<float> vtx, col;
-  void makePCD(int numPoints) {
-    numP = numPoints;
-    float theta, phi, rho;
-    float x, y, z;
-    for (int i = 0; i < numPoints; ++i) {
-      if (i < numPoints / 3) {
-        rho = 1;
-
-        col.push_back(1);
-        col.push_back(1);
-        col.push_back(0);
-        col.push_back(1);
-
-      } else if (i < 2 * numPoints / 3) {
-        rho = 2;
-
-        col.push_back(1);
-        col.push_back(0);
-        col.push_back(1);
-        col.push_back(1);
-      } else {
-        rho = 3;
-
-        col.push_back(0);
-        col.push_back(1);
-        col.push_back(1);
-        col.push_back(1);
-      }
-
-      x = ((rand() % 200) / 100.0) - 1;
-      y = ((rand() % 200) / 100.0) - 1;
-      z = ((rand() % 200) / 100.0) - 1;
-
-      x *= rho;
-      y *= rho;
-      z *= rho;
-
-      vtx.push_back(x);
-      vtx.push_back(y);
-      vtx.push_back(z);
-    }
-  };
+  void makePCD(int numPoints);
 };
 
 #endif
