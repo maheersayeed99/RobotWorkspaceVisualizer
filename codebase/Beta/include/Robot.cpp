@@ -114,6 +114,18 @@ int Robot::read_urdf(std::string fileName) {
     XMLCheckResult(eResult);
     string2vector3d(joint.axis_, xyz_axis);
 
+    // ################# JOINT LIMIT ################# //
+    pElement = pListElement->FirstChildElement("limit");
+    if (pElement == nullptr) return tinyxml2::XML_ERROR_PARSING_ELEMENT;
+    const char* lower = nullptr;
+    const char* upper = nullptr;
+    eResult = pElement->QueryStringAttribute("lower", &lower);
+    XMLCheckResult(eResult);
+    eResult = pElement->QueryStringAttribute("upper", &upper);
+    XMLCheckResult(eResult);
+    joint.joint_limits_[0] = std::stod(lower);
+    joint.joint_limits_[1] = std::stod(upper);
+
     // ################# SAVE ################# //
     joints_.push_back(joint);
     pListElement = pListElement->NextSiblingElement("joint");
@@ -170,7 +182,7 @@ void Robot::savePCD(std::string fileName) {
   }
 }
 
-Eigen::Vector3d Robot::forward_kinematics(
+Eigen::Vector3d Robot::forward_kinematics_single(
     std::vector<double> joint_angle) const {
   std::vector<Eigen::Matrix4d> gsts;
 
@@ -191,9 +203,9 @@ Eigen::Vector3d Robot::forward_kinematics(
     // translation vector v = -1*cross(w, q)
     // w is axis, q is origin_xyz
     Eigen::Vector3d v;
-    v = -1 * next_joint.axis_ * next_joint.origin_xyz_;
+    v = -1 * next_joint.axis_.cross(next_joint.origin_xyz_);
     Eigen::Vector3d w;
-    w << next_joint.axis_ * RMrpy;
+    w << next_joint.axis_;
 
     // fill twist hat vector
     Eigen::Matrix4d twist_hat;
@@ -229,7 +241,7 @@ Eigen::Vector3d Robot::forward_kinematics(
 
   // TODO: tool_translate need to be a Vector4d
   Eigen::Matrix4d toolFrame;
-  toolFrame = total_transform * tool_translate;
+  toolFrame = total_transform * gs0;
 
   Eigen::Matrix3d finalRotation;
   finalRotation << toolFrame(0), toolFrame(1), toolFrame(2), toolFrame(4),
