@@ -25,14 +25,14 @@ target_link_libraries(test_urdf3 robot)
 add_test(NAME test_urdf3 COMMAND test_urdf3)
 
 # Get workspace
-add_executable(test_ws1 MACOSX_BUNDLE test_ws1.cpp)
-target_link_libraries(test_ws1 robot)
-add_test(NAME test_ws1 COMMAND test_ws1)
+# add_executable(test_ws1 MACOSX_BUNDLE test_ws1.cpp)
+# target_link_libraries(test_ws1 robot)
+# add_test(NAME test_ws1 COMMAND test_ws1)
 
-add_executable(test_ws2 MACOSX_BUNDLE test_ws2.cpp)
-target_link_libraries(test_ws2 robot)
-add_test(NAME test_ws2 COMMAND test_ws2)
+# add_executable(test_ws2 MACOSX_BUNDLE test_ws2.cpp)
+# target_link_libraries(test_ws2 robot)
+# add_test(NAME test_ws2 COMMAND test_ws2)
 
-add_executable(test_ws3 MACOSX_BUNDLE test_ws3.cpp)
-target_link_libraries(test_ws3 robot)
-add_test(NAME test_ws3 COMMAND test_ws3)
+# add_executable(test_ws3 MACOSX_BUNDLE test_ws3.cpp)
+# target_link_libraries(test_ws3 robot)
+# add_test(NAME test_ws3 COMMAND test_ws3)
