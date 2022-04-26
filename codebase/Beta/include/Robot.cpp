@@ -301,7 +301,25 @@ void Robot::print_map(
   }
 }
 
-void Robot::makePCD(int numPoints) {
+
+void Robot::makePCD() {
+
+    for (auto const& pair : point_cloud_) {
+
+        vtx.push_back((float)pair.first[0]);
+        vtx.push_back((float)pair.first[1]);
+        vtx.push_back((float)pair.first[2]);
+
+        col.push_back(1);
+        col.push_back(1);
+        col.push_back(0);
+        col.push_back(1);
+
+    }
+
+}
+
+void Robot::makeTempPCD(int numPoints) {
   numP = numPoints;
   float theta, phi, rho;
   float x, y, z;

@@ -125,7 +125,8 @@ class Robot {
   float rgb = 4.808e+06;
   std::vector<float> xvec, yvec, zvec;
   std::vector<float> vtx, col;
-  void makePCD(int numPoints);
+  void makePCD();
+  void makeTempPCD(int numPoints);
 };
 
 #endif

@@ -33,6 +33,7 @@ class ApplicationMain {
   void ResetViewDistance();
 
   decltype(std::chrono::high_resolution_clock::now()) lastT;
+
 };
 
 ApplicationMain::ApplicationMain(int argc, char* argv[]) {
@@ -46,7 +47,8 @@ ApplicationMain::ApplicationMain(int argc, char* argv[]) {
       robot.get_workspace(configs, 8);
       robot.print_map(robot.point_cloud_);
       // TODO: Use real point cloud here
-      robot.makePCD(5000);
+      //robot.makePCD();        // uncomment when fk is working
+      robot.makeTempPCD(5000);
       // TODO: Find a way to convert robot.point_cloud_ to vtx and col
       vtx = robot.vtx;
       col = robot.col;
