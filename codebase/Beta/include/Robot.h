@@ -49,6 +49,8 @@ class Robot {
   class Joint {
     friend Robot;
     typedef enum { fixed, revolute, continuous, prismatic } joint_type;
+
+   public:
     joint_type joint_type_;
     std::string joint_name_;
     std::string child_link_name_;
@@ -59,12 +61,6 @@ class Robot {
     double joint_state_;  // default angle of the joint
     double joint_limits_[2];
   };
-
-  /*=====================Helper Functions====================*/
-  // Utility functions
- private:
-  Eigen::Matrix3d Euler_to_Rmatrix(Eigen::Vector3d rpy) const;
-  Eigen::Vector3d Rmatrix_to_Euler(Eigen::Matrix3d RM) const;
 
  public:
   /* read_urdf
@@ -116,6 +112,7 @@ class Robot {
   /*=====================Helper Functions====================*/
   // Testing only, do not use in final version
  public:
+  void print_joints() const;
   void print_1dVec(std::vector<double> vec);
   void print_2dVec(std::vector<std::vector<double>> vec);
   void print_map(

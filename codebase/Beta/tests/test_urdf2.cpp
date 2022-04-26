@@ -2,5 +2,10 @@
 
 int main() {
   Robot robot;
-  return 1;
+  if (0 != robot.read_urdf("../../NamingSoHard/codebase/Beta/tests/ur5.urdf")) {
+    return 1;
+  }
+  std::cout << "Success!!\n";
+
+  return 0;
 }
