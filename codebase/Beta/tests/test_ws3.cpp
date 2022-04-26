@@ -26,7 +26,7 @@ int main()
     std::vector<double> single_config(njoints, i); // here the actual coonfigs are just i
     configs.push_back(single_config);
   }
-  robot.get_workspace(configs, 8); // more threads requested than needed
+  robot.get_workspace(configs, 8, true); // more threads requested than needed
 
   /*
   Here since number of tasks is fewer than number of threads,

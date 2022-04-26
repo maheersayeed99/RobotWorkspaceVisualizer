@@ -24,7 +24,7 @@ int main() {
     std::vector<double> single_config(njoints,i); // here the actual coonfigs are just i
     configs.push_back(single_config);
   }
-  robot.get_workspace(configs, 4);
+  robot.get_workspace(configs, 4, true);
 
   /*
   Here if we print the map, we should see the map keys being

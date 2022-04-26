@@ -1,14 +1,13 @@
 #include "Robot.h"
 
-// =============================== FOR TESTING ONLY ===================================
-/* 
-In order to test the functionality of get_workspace, we for now assume forward_kinematics 
-would be properly implemented in the future and will return correct results. This version
-only generates a fake output that is 10 times the value of the first element in config.
-*/
+std::vector<std::vector<double>> Robot::generate_config(int resolution) const {
+  std::vector<std::vector<double>> configs;
+  return configs;
+}
 
 std::vector<std::vector<double>> Robot::forward_kinematics(
-    std::vector<std::vector<double>> configs) const {
+    std::vector<std::vector<double>> configs, bool testing) const
+{
   /*
   summary: the function takes in a batch of configurations and computes
   corresponding end-effector positions 
@@ -16,19 +15,41 @@ std::vector<std::vector<double>> Robot::forward_kinematics(
     1st dim - an array (vector) of different configurations; dim1 = number of configs 
     2nd dim - an array (vector) of settings (i.e. length/angle) for each Joint (idx_0 is base
       and idx_end is end-effector); dim2 = joints.size() 
+  param testing: indicate whether to use the testing version or not
   return: a 2d vector 
     1st dim - various configurations 
     2nd dim - xyz cooridnates
   */
-  
-  std::vector<std::vector<double>> end_positions;
-  for (int i = 0; i < configs.size(); ++i) {
-    std::vector<double> single_res(3, configs[i][0]*10);
-    end_positions.push_back(single_res);
+  if (!testing)
+  {
+    std::vector<std::vector<double>> end_positions = {};
+    for (int i = 0; i < configs.size(); ++i)
+    {
+      Eigen::Vector3d single_res = Robot::forward_kinematics_single(configs[i]);
+      end_positions[i].push_back(double(single_res[0]));
+      end_positions[i].push_back(double(single_res[1]));
+      end_positions[i].push_back(double(single_res[2]));
+    }
+    return end_positions;
   }
-  return end_positions;
+  else
+  {
+    // =============================== FOR TESTING ONLY ===================================
+    /*
+    In order to test the functionality of get_workspace, we for now assume forward_kinematics
+    would be properly implemented in the future and will return correct results. This version
+    only generates a fake output that is 10 times the value of the first element in config.
+    */
+    std::vector<std::vector<double>> end_positions;
+    for (int i = 0; i < configs.size(); ++i) {
+      std::vector<double> single_res(3, configs[i][0]*10);
+      end_positions.push_back(single_res);
+    }
+    return end_positions;
+    // =====================================================================================
+  }
 }
-// =====================================================================================
+
 
 
 void Robot::save2map(std::vector<std::vector<double>> &pos,
@@ -59,7 +80,8 @@ void Robot::save2map(std::vector<std::vector<double>> &pos,
 }
 
 // ===================================== VERSION 2 ===========================================
-void Robot::get_workspace(std::vector<std::vector<double>> configs, int nThreads = 4) {
+void Robot::get_workspace(std::vector<std::vector<double>> configs, int nThreads, bool testing) 
+{
   /*
   param configs: a 2D array (vector) that stores all possible configurations
   param nThreads: number of threads available
@@ -78,7 +100,7 @@ void Robot::get_workspace(std::vector<std::vector<double>> configs, int nThreads
     auto some_configs = std::vector<std::vector<double>>(start, end);  // same type as configs
     // feed to threads
     auto fut = std::async(std::launch::async, &Robot::forward_kinematics, this,
-                          some_configs);
+                          some_configs, testing);
     // typecast future objects; a vector of xyz coordinates
     std::vector<std::vector<double>> thread_res = fut.get();
     save2map(thread_res, some_configs);

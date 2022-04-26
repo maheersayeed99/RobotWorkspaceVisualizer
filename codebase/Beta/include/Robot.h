@@ -68,7 +68,7 @@ class Robot {
   */
   int read_urdf(std::string filepath);
 
-  /* forward_kinematics
+  /* forward_kinematics_single
   summary: the function takes in a vector of joint angle and computes the final
   position as a Eigen::Vector3d
   */
@@ -84,15 +84,16 @@ class Robot {
   - various configurations 2nd dim - xyz cooridnates
   */
   std::vector<std::vector<double>> forward_kinematics(
-      std::vector<std::vector<double>> configs) const;
+      std::vector<std::vector<double>> configs, bool testing = false) const;
 
   /* get_workspace
   store everything in the hashmap: point_cloud_
   remember to check if there is an existing value for each key
   if so, stack all results in a new nested vector
   */
+  std::vector<std::vector<double>> generate_config(int resolution) const;
   void get_workspace(std::vector<std::vector<double>> configs,
-                     const int nThreads);
+                     int nThreads = 4, bool testing = false);
   void save2map(std::vector<std::vector<double>> &pos,
                 std::vector<std::vector<double>> &configs);
 

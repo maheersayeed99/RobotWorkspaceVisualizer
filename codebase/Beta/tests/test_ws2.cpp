@@ -28,7 +28,7 @@ int main() {
     single_config.push_back(i);
     configs.push_back(single_config);
   }
-  robot.get_workspace(configs, 4);
+  robot.get_workspace(configs, 4, true);
 
   /*
   Here if we print the map, we should see each map key have
