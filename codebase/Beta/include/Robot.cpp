@@ -151,10 +151,10 @@ void Robot::savePCD(std::string fileName) {
     PCD << "SIZE 4 4 4 4" << std::endl;
     PCD << "TYPE F F F F" << std::endl;
     PCD << "COUNT 1 1 1 1" << std::endl;
-    PCD << "WIDTH " << numP << std::endl;
+    PCD << "WIDTH " << point_cloud_.size() << std::endl;
     PCD << "HEIGHT 1" << std::endl;
     PCD << "VIEWPOINT 0 0 0 1 0 0 0" << std::endl;
-    PCD << "POINTS " << numP << std::endl;
+    PCD << "POINTS " << point_cloud_.size() << std::endl;
     PCD << "DATA ascii" << std::endl;
 
     for (auto const& pair : point_cloud_) {
