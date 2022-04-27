@@ -287,59 +287,87 @@ void Robot::makePCD() {
 }
 
 void Robot::makeLattice(double minmax[2][3]) {
-    float h = 1.0;
+  float h = 0.1;
 
-    YsVec3 minVec(minmax[0][0], minmax[0][1], minmax[0][2]);
-    YsVec3 maxVec(minmax[1][0], minmax[1][1], minmax[1][2]);
+  if (minmax[0][0] == minmax[1][0]) minmax[1][0] += h;
+  if (minmax[0][1] == minmax[1][1]) minmax[1][1] += h;
+  if (minmax[0][2] == minmax[1][2]) minmax[1][2] += h;
 
-    int nx, ny, nz;
-    nx = (int)((maxVec.x() - minVec.x()) / h);
-    ny = (int)((maxVec.y() - minVec.y()) / h);
-    nz = (int)((maxVec.z() - minVec.z()) / h);
+  YsVec3 minVec(minmax[0][0], minmax[0][1], minmax[0][2]);
+  YsVec3 maxVec(minmax[1][0], minmax[1][1], minmax[1][2]);
 
-    ltc.Create(nx, ny, nz, minVec, maxVec);
+  int nx, ny, nz;
+  nx = (int)((maxVec.x() - minVec.x()) / h) + 1;
+  ny = (int)((maxVec.y() - minVec.y()) / h) + 1;
+  nz = (int)((maxVec.z() - minVec.z()) / h) + 1;
+  std::cout << "x: " << nx << " y:" << ny << " z: " << nz << "\n";
+  ltc.Create(nx, ny, nz, minVec, maxVec);
+  for (int ix = 0; ix < nx; ++ix) {
+    for (int iy = 0; iy < ny; ++iy) {
+      for (int iz = 0; iz < nz; ++iz) {
+        ltc[YsVec3i(ix, iy, iz)].clear();
+      }
+    }
+  }
 }
 
 void Robot::addToLattice(std::vector<double> coordinate) {
-    YsVec3 pos(coordinate[0], coordinate[1], coordinate[2]);
-    YsVec3i idx = ltc.GetBlockIndex(pos);
-    //std::vector<double> testVec;
-    //testVec = ltc[idx];
-    ltc[idx].push_back(coordinate);
+  YsVec3 pos(coordinate[0], coordinate[1], coordinate[2]);
+  YsVec3i idx = ltc.GetBlockIndex(pos);
+  // std::vector<double> testVec;
+  // testVec = ltc[idx];
+  ltc[idx].push_back(coordinate);
+  // std::cout << "At IDX\n";
+  // std::cout << "x: " << idx.x() << " y: " << idx.y() << " z: " << idx.z()
+  //           << "\n";
+  // std::cout << ltc[idx].size() << "------------\n";
+  // std::cout << "x: " << ltc[idx].at(0)[0] << " y: " << ltc[idx].at(0)[1]
+  //           << " z: " << ltc[idx].at(0)[2] << "\n\n";
 }
-
 
 void Robot::fillPointCloud() {
-    for (auto const& pair : point_cloud_) {
-        addToLattice(pair.first);
-    }
+  for (auto const& pair : point_cloud_) {
+    addToLattice(pair.first);
+  }
 }
 
-
 std::vector<double> Robot::findClosestPoint(std::vector<double> iptCoordinate) {
-    YsVec3 pos(iptCoordinate[0], iptCoordinate[1], iptCoordinate[2]);
-    YsVec3i idx = ltc.GetBlockIndex(pos);
-    std::vector<double> rslt;
-    double currDist, minDist;
-    minDist = findDist(ltc[idx][0], iptCoordinate);
-    
-    std::cout << idx.x() <<"   "<<idx.y() << std::endl;
-    
-    for (std::vector<double> currVec : ltc[idx]) {
-        currDist = findDist(currVec, iptCoordinate);
-        if (currDist < minDist) {
-            minDist = currDist;
-            rslt = currVec;
+  YsVec3 pos(iptCoordinate[0], iptCoordinate[1], iptCoordinate[2]);
+  std::cout << "Looking for point:\n";
+  std::cout << "x: " << pos.x() << " y: " << pos.y() << " z: " << pos.z()
+            << "\n";
+  YsVec3i ltcIdx = ltc.GetBlockIndex(pos);
+  std::cout << "At IDX\n";
+  std::cout << "x: " << ltcIdx.x() << " y: " << ltcIdx.y()
+            << " z: " << ltcIdx.z() << "\n";
+  std::vector<double> rslt;
+  double currDist, minDist;
+  minDist = 9999;
+  for (int x = ltcIdx.x() - 1; x <= ltcIdx.x() + 1; ++x) {
+    for (int y = ltcIdx.y() - 1; y <= ltcIdx.y() + 1; ++y) {
+      for (int z = ltcIdx.z() - 1; z <= ltcIdx.z() + 1; ++z) {
+        YsVec3i idx(x, y, z);
+        if (true == ltc.IsInRange(idx)) {
+          for (auto point : ltc[idx]) {
+            YsVec3 temp(point[0], point[1], point[2]);
+            auto dd = (pos - temp).GetSquareLength();
+            if (dd < minDist) {
+              minDist = dd;
+              rslt = point;
+            }
+          }
         }
+      }
     }
-
-    return rslt;
+  }
+  return rslt;
 }
 
 double Robot::findDist(std::vector<double> vec1, std::vector<double> vec2) {
-    double rslt = pow((vec1[0] - vec2[0]), 2) + pow((vec1[1] - vec2[1]), 2) + pow((vec1[2] - vec2[2]), 2);
-    rslt = pow(rslt, .5);
-    return rslt;
+  double rslt = pow((vec1[0] - vec2[0]), 2) + pow((vec1[1] - vec2[1]), 2) +
+                pow((vec1[2] - vec2[2]), 2);
+  rslt = pow(rslt, .5);
+  return rslt;
 }
 
 void Robot::makeTempPCD(int numPoints) {

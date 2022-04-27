@@ -173,19 +173,28 @@ void ApplicationMain::RunOneStep(void) {
     std::cout << "Enter x-coordinate: ";
     std::cin >> temp;
     iptVec.push_back(temp);
+    vtx.push_back(temp);
     std::cout << std::endl;
 
     std::cout << "Enter y-coordinate: ";
     std::cin >> temp;
     iptVec.push_back(temp);
+    vtx.push_back(temp);
     std::cout << std::endl;
 
     std::cout << "Enter z-coordinate: ";
     std::cin >> temp;
     iptVec.push_back(temp);
+    vtx.push_back(temp);
     std::cout << std::endl;
 
+    col.push_back(1);
+    col.push_back(0);
+    col.push_back(0);
+    col.push_back(1);
+
     std::cout << "Finding closest point:" << std::endl;
+
     optVec = robot.findClosestPoint(iptVec);
 
     if (optVec.size() > 0) {
