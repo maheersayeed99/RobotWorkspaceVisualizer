@@ -91,7 +91,10 @@ class Robot {
   remember to check if there is an existing value for each key
   if so, stack all results in a new nested vector
   */
-  std::vector<std::vector<double>> generate_config(int resolution) const;
+  std::vector<std::vector<double>> generate_config(int resolution);
+  bool generate_config_recursive(std::vector<std::vector<double>> &configs, std::vector<std::vector<double>> &joint_values,
+                                 std::vector<int> &indices,
+                                 int resolution, int jointID, int last_joint);
   void get_workspace(std::vector<std::vector<double>> configs,
                      int nThreads = 4, bool testing = false);
   void save2map(std::vector<std::vector<double>> &pos,
