@@ -50,6 +50,7 @@ bool Robot::generate_config_recursive(std::vector<std::vector<double>> &configs,
 }
 
 std::vector<std::vector<double>> Robot::generate_config(int resolution) {
+
   std::vector<std::vector<double>> configs; //  resolution ^ n_joints
   std::vector<std::vector<double>> joint_values; // n_joints * resolution
   auto n_MovingJoints = joints_.size() - 2; // ignore the first and last joints
@@ -65,7 +66,7 @@ std::vector<std::vector<double>> Robot::generate_config(int resolution) {
     }
     joint_values.push_back(values);
   }
-  
+
   std::vector<int> indices(n_MovingJoints - 1, 0); // stores values of all moveable joints except last one
   Robot::generate_config_recursive(configs, joint_values, indices,
                             resolution, 0, n_MovingJoints - 1);
@@ -101,9 +102,12 @@ std::vector<std::vector<double>> Robot::forward_kinematics(
     for (int i = 0; i < configs.size(); ++i)
     {
       Eigen::Vector3d single_res = Robot::forward_kinematics_single(configs[i]);
-      end_positions[i].push_back(double(single_res[0]));
-      end_positions[i].push_back(double(single_res[1]));
-      end_positions[i].push_back(double(single_res[2]));
+      // single_result_vector.clear();
+      std::vector<double> single_result_vector = {};
+      single_result_vector.push_back(double(single_res[0]));
+      single_result_vector.push_back(double(single_res[1]));
+      single_result_vector.push_back(double(single_res[2]));
+      end_positions.push_back(single_result_vector);
     }
     return end_positions;
   }
@@ -139,13 +143,13 @@ void Robot::save2map(std::vector<std::vector<double>> &pos,
   for (int i = 0; i < pos.size(); ++i) {
     // this->point_cloud_[pos[i]].push_back(configs[i]);
     if (this->point_cloud_.find(pos[i]) != this->point_cloud_.end()) {
-      std::cout << "Append new configurations to existing entries" << std::endl;
+      // std::cout << "Append new configurations to existing entries" << std::endl;
       // print_1dVec(pos[i]);
       // print_1dVec(configs[i]);
       // std::cout << std::endl;
       this->point_cloud_[pos[i]].push_back(configs[i]);
     } else {
-      std::cout << "Creating new key-value pair" << std::endl;
+      // std::cout << "Creating new key-value pair" << std::endl;
       // print_1dVec(pos[i]);
       // print_1dVec(configs[i]);
       // std::cout << std::endl;
