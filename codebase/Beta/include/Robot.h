@@ -17,6 +17,9 @@
 #include <string>
 #include <fstream>
 #include "tinyxml2.h"
+#include "lattice.h"
+
+
 
 #ifndef XMLCheckResult
 #define XMLCheckResult(a_eResult)           \
@@ -128,6 +131,16 @@ class Robot {
   std::vector<float> vtx, col;
   void makePCD();
   void makeTempPCD(int numPoints);
+
+
+
+  // Lattice functions and members
+  Lattice3d<std::vector<std::vector<double>>> ltc;
+  void makeLattice(double minmax[2][3]);
+  void addToLattice(std::vector<double> coordinate);
+  double findDist(std::vector<double> vec1, std::vector<double> vec2);
+  std::vector<double> findClosestPoint(std::vector<double> iptCoordinate);
+
 };
 
 #endif

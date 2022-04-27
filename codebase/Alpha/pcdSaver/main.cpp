@@ -17,13 +17,17 @@ const double PI = 3.14159276;
 
 class button {
  public:
-  float x, y, wid, hei, xoff, yoff;
-  int val;
-  int colorRed[3] = {200, 70, 70};
+  float x, y, wid, hei, xoff, yoff;         // Location and dimensions
+
+  int val;                                  // Used for naming joint/link buttons
+  
+  int colorRed[3] = {200, 70, 70};          // Colors
   int colorBlue[3] = {100, 100, 255};
   int colorWhite[3] = {255, 255, 255};
-  char type;
-  bool hover;
+  
+  char type;            // Checks what type of button it is (link, joint, etc.)
+
+  bool hover;           // Checks if mouse is over button
 
   button(float x1, float y1, int val1, char type1) {
     x = x1;
@@ -34,11 +38,11 @@ class button {
     xoff = 10;
     yoff = -10;
     type = type1;
+    hover = false;
   }
 
-  void draw();
-  bool isInButton(int x, int y);
-  bool checkInButton(float x, float y);
+  void draw();                              // Draw individual button
+  bool isInButton(int x, int y);            // Check if mouse is over button
 };
 
 void button::draw() {
@@ -57,6 +61,9 @@ void button::draw() {
     } else {
       glColor3ub(colorRed[0], colorRed[1], colorRed[2]);
     }
+
+
+
     glVertex2f(x, y);
     glVertex2f(x + wid, y);
     glVertex2f(x + wid, y - hei);
@@ -72,11 +79,14 @@ void button::draw() {
 
     glBegin(GL_QUADS);
 
+    
     if (hover) {
       glColor3ub(colorWhite[0], colorWhite[1], colorWhite[2]);
     } else {
       glColor3ub(colorBlue[0], colorBlue[1], colorBlue[2]);
     }
+
+
     glVertex2f(x, y);
     glVertex2f(x + wid, y);
     glVertex2f(x + wid, y - hei);
@@ -86,13 +96,15 @@ void button::draw() {
   }
 }
 
-bool button::isInButton(int x1, int y1) {
-  if ((x1 > x) && (x1 < x + wid)) {
-    if ((y1 < y) && (y1 > y + hei)) {
-      return true;
+bool button::isInButton(int x1, int y1) 
+{
+    if ((x1 > x) && (x1 < x + wid)) 
+    {
+        if ((y1 > y-hei) && (y1 < y)) {
+            return true;
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 class pcd {
@@ -115,6 +127,13 @@ class pcd {
 
   std::vector<button*> linkVec;
   std::vector<button*> jointVec;
+
+
+  // Mouse events
+
+  int mouseX, mouseY;
+
+
 
   pcd() {
     viewTarget = YsVec3::Origin();
@@ -296,12 +315,17 @@ void pcd::drawMenu(int val, int wid, int hei, int type) {
   glPushMatrix();
   glLoadIdentity();
 
-  for (button* currButton : linkVec) {
-    currButton->draw();
+  for (button* currButton : linkVec) 
+  {
+      currButton->hover = currButton->isInButton(mouseX, mouseY);
+      currButton->draw();
+
   }
 
+
   for (button* currButton : jointVec) {
-    currButton->draw();
+      currButton->hover = currButton->isInButton(mouseX, mouseY);
+      currButton->draw();
   }
 
   /*
@@ -405,6 +429,9 @@ void pcd::drawPCD() {
   FsSleep(25);
 }
 void pcd::RunOneStep() {
+  int wid, hei;
+  FsGetWindowSize(wid, hei);  // get window size
+
   auto deltaT = std::chrono::high_resolution_clock::now() - lastT;
   auto deltaTinMS =
       std::chrono::duration_cast<std::chrono::microseconds>(deltaT).count();
@@ -412,6 +439,25 @@ void pcd::RunOneStep() {
   lastT = std::chrono::high_resolution_clock::now();
 
   auto key = FsInkey();
+  
+  int mouseEvent, leftButton, middleButton, rightButton, locX, locY;
+  
+
+  mouseEvent = FsGetMouseEvent(leftButton, middleButton,
+      rightButton, locX, locY);
+  mouseX = locX - (wid/2);
+  mouseY = locY - (hei/2);
+  std::cout << mouseX << "   " << mouseY << std::endl;
+
+
+  if (mouseEvent == FSMOUSEEVENT_LBUTTONDOWN || mouseEvent == FSMOUSEEVENT_MBUTTONDOWN) {
+      mouseX = locX; 
+      mouseY = locY;  // capture location of first button press
+      //std::cout << mouseX << "   " << mouseY << std::endl;
+  }
+
+
+
 
   if (FSKEY_ESC == key) {
     term = true;

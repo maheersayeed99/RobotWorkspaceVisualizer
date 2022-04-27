@@ -287,6 +287,51 @@ void Robot::makePCD() {
   }
 }
 
+void Robot::makeLattice(double minmax[2][3]) {
+    float h = 1.0;
+
+    YsVec3 minVec(minmax[0][0], minmax[0][1], minmax[0][2]);
+    YsVec3 maxVec(minmax[1][0], minmax[1][1], minmax[1][2]);
+
+    int nx, ny, nz;
+    nx = (int)((maxVec.x() - minVec.x()) / h);
+    ny = (int)((maxVec.y() - minVec.y()) / h);
+    nz = (int)((maxVec.z() - minVec.z()) / h);
+
+    ltc.Create(nx, ny, nz, minVec, maxVec);
+}
+
+void Robot::addToLattice(std::vector<double> coordinate) {
+    YsVec3 pos(coordinate[0], coordinate[1], coordinate[2]);
+    YsVec3i idx = ltc.GetBlockIndex(pos);
+    //std::vector<double> testVec;
+    //testVec = ltc[idx];
+    ltc[idx].push_back(coordinate);
+}
+
+std::vector<double> Robot::findClosestPoint(std::vector<double> iptCoordinate) {
+    YsVec3 pos(iptCoordinate[0], iptCoordinate[1], iptCoordinate[2]);
+    YsVec3i idx = ltc.GetBlockIndex(pos);
+    std::vector<double> rslt;
+    double currDist, minDist;
+    minDist = findDist(ltc[idx][0], iptCoordinate);
+    for (std::vector<double> currVec : ltc[idx]) {
+        currDist = findDist(currVec, iptCoordinate);
+        if (currDist < minDist) {
+            minDist = currDist;
+            rslt = currVec;
+        }
+
+    }
+    return rslt;
+}
+
+double Robot::findDist(std::vector<double> vec1, std::vector<double> vec2) {
+    double rslt = pow((vec1[0] - vec2[0]), 2) + pow((vec1[1] - vec2[1]), 2) + pow((vec1[2] - vec2[2]), 2);
+    rslt = pow(rslt, .5);
+    return rslt;
+}
+
 void Robot::makeTempPCD(int numPoints) {
   numP = numPoints;
   float theta, phi, rho;
