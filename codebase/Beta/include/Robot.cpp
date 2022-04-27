@@ -226,9 +226,8 @@ Eigen::Vector3d Robot::forward_kinematics_single(
   base2ee_transform = base2joint_transform * gs0;
 
   Eigen::Vector3d eeFrame_pos;
-  eeFrame_pos << round(base2ee_transform(12) * 10000.0) / 10000.0,
-      round(base2ee_transform(13) * 10000.0) / 10000.0,
-      round(base2ee_transform(14) * 10000.0) / 10000.0;
+  eeFrame_pos << base2ee_transform(12), base2ee_transform(13),
+      base2ee_transform(14);
 
   return eeFrame_pos;
 }
@@ -321,7 +320,6 @@ std::vector<double> Robot::findClosestPoint(std::vector<double> iptCoordinate) {
             minDist = currDist;
             rslt = currVec;
         }
-
     }
     return rslt;
 }
