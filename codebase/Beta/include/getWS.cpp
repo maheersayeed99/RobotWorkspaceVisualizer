@@ -2,20 +2,19 @@
 #include <algorithm>
 #include <math.h>
 
-bool Robot::generate_config_recursive(std::vector<std::vector<double>> &configs, std::vector<std::vector<double>> &joint_values, 
-                               std::vector<int> &indices,
-                               int resolution, int jointID, int last_joint)
-{
+bool Robot::generate_config_recursive(
+    std::vector<std::vector<double>> &configs,
+    std::vector<std::vector<double>> &joint_values, std::vector<int> &indices,
+    int resolution, int jointID, int last_joint) {
   // ==================================================
   int next_jointID = jointID + 1;
 
-  if (jointID == last_joint)
-  {
-    for (int i = 0; i < resolution; ++i)
-    {
+  if (jointID == last_joint) {
+    for (int i = 0; i < resolution; ++i) {
       std::vector<double> single_config;
       // insert config for all previous joints
-      for (int j = 0; j < indices.size(); ++j) // jth joint; indices[j] the current config of jth joint
+      for (int j = 0; j < indices.size();
+           ++j)  // jth joint; indices[j] the current config of jth joint
       {
         single_config.push_back(joint_values[j][indices[j]]);
       }
@@ -24,25 +23,17 @@ bool Robot::generate_config_recursive(std::vector<std::vector<double>> &configs,
       configs.push_back(single_config);
     }
     return true;
-  }
-  else if (jointID < last_joint)
-  {
-    for (int idx = 0; idx < resolution; ++idx)
-    {
+  } else if (jointID < last_joint) {
+    for (int idx = 0; idx < resolution; ++idx) {
       indices[jointID] = idx;
       // std::cout << "I'm here" << jointID << std::endl;
-      if (Robot::generate_config_recursive(configs, 
-                                           joint_values, 
-                                           indices, 
-                                           resolution, 
-                                           next_jointID, 
-                                           last_joint))
-      {
+      if (Robot::generate_config_recursive(configs, joint_values, indices,
+                                           resolution, next_jointID,
+                                           last_joint)) {
         continue;
-      }
-      else
-      {
-        std::cout << "Something went wrong in the recursive function." << std::endl;
+      } else {
+        std::cout << "Something went wrong in the recursive function."
+                  << std::endl;
       }
     }
     return true;
@@ -50,31 +41,36 @@ bool Robot::generate_config_recursive(std::vector<std::vector<double>> &configs,
 }
 
 std::vector<std::vector<double>> Robot::generate_config(int resolution) {
-
-  std::vector<std::vector<double>> configs; //  resolution ^ n_joints
-  std::vector<std::vector<double>> joint_values; // n_joints * resolution
-  auto n_MovingJoints = joints_.size() - 2; // ignore the first and last joints
-  for (int i = 1; i < joints_.size() - 1; ++i)
-  {
-    double lowerb = std::min(joints_[i].joint_limits_[0], joints_[i].joint_limits_[1]);
-    double range = abs(joints_[i].joint_limits_[0] - joints_[i].joint_limits_[1]);
-    double increment = range / (double)(resolution - 1); // resolution = 5 means 4 increments
+  std::vector<std::vector<double>> configs;       //  resolution ^ n_joints
+  std::vector<std::vector<double>> joint_values;  // n_joints * resolution
+  auto n_MovingJoints = joints_.size() - 2;  // ignore the first and last joints
+  for (int i = 1; i < joints_.size() - 1; ++i) {
+    double lowerb =
+        std::min(joints_[i].joint_limits_[0], joints_[i].joint_limits_[1]);
+    double range =
+        abs(joints_[i].joint_limits_[0] - joints_[i].joint_limits_[1]);
+    double increment =
+        range / (double)(resolution - 1);  // resolution = 5 means 4 increments
     std::vector<double> values;
-    for (int j = 0; j < resolution; ++j)
-    {
+    for (int j = 0; j < resolution; ++j) {
       values.push_back(lowerb + increment * j);
     }
     joint_values.push_back(values);
   }
 
-  std::vector<int> indices(n_MovingJoints - 1, 0); // stores values of all moveable joints except last one
-  Robot::generate_config_recursive(configs, joint_values, indices,
-                            resolution, 0, n_MovingJoints - 1);
+  std::vector<int> indices(
+      n_MovingJoints - 1,
+      0);  // stores values of all moveable joints except last one
+  Robot::generate_config_recursive(configs, joint_values, indices, resolution,
+                                   0, n_MovingJoints - 1);
   std::cout << "Total number of joints: " << joints_.size() << std::endl;
   std::cout << "Number of movable joints: " << n_MovingJoints << std::endl;
-  std::cout << "Number of movable positions per joint: " << resolution << std::endl;
-  std::cout << "Should generate " << std::pow(resolution, n_MovingJoints) << " configurations." << std::endl;
-  std::cout << "Generated " << configs.size() << " configurations." << std::endl;
+  std::cout << "Number of movable positions per joint: " << resolution
+            << std::endl;
+  std::cout << "Should generate " << std::pow(resolution, n_MovingJoints)
+            << " configurations." << std::endl;
+  std::cout << "Generated " << configs.size() << " configurations."
+            << std::endl;
 
   assert((std::pow(resolution, n_MovingJoints) == configs.size()));
 
@@ -82,25 +78,20 @@ std::vector<std::vector<double>> Robot::generate_config(int resolution) {
 }
 
 std::vector<std::vector<double>> Robot::forward_kinematics(
-        std::vector<std::vector<double>> configs, bool testing) const
-{
+    std::vector<std::vector<double>> configs, bool testing) const {
   /*
   summary: the function takes in a batch of configurations and computes
-  corresponding end-effector positions 
-  param configs: 
-    1st dim - an array (vector) of different configurations; dim1 = number of configs 
-    2nd dim - an array (vector) of settings (i.e. length/angle) for each Joint (idx_0 is base
-      and idx_end is end-effector); dim2 = joints.size() 
-  param testing: indicate whether to use the testing version or not
-  return: a 2d vector 
-    1st dim - various configurations 
-    2nd dim - xyz cooridnates
+  corresponding end-effector positions
+  param configs:
+    1st dim - an array (vector) of different configurations; dim1 = number of
+  configs 2nd dim - an array (vector) of settings (i.e. length/angle) for each
+  Joint (idx_0 is base and idx_end is end-effector); dim2 = joints.size() param
+  testing: indicate whether to use the testing version or not return: a 2d
+  vector 1st dim - various configurations 2nd dim - xyz cooridnates
   */
-  if (!testing)
-  {
+  if (!testing) {
     std::vector<std::vector<double>> end_positions = {};
-    for (int i = 0; i < configs.size(); ++i)
-    {
+    for (int i = 0; i < configs.size(); ++i) {
       Eigen::Vector3d single_res = Robot::forward_kinematics_single(configs[i]);
       // single_result_vector.clear();
       std::vector<double> single_result_vector = {};
@@ -110,18 +101,18 @@ std::vector<std::vector<double>> Robot::forward_kinematics(
       end_positions.push_back(single_result_vector);
     }
     return end_positions;
-  }
-  else
-  {
-    // =============================== FOR TESTING ONLY ===================================
+  } else {
+    // =============================== FOR TESTING ONLY
+    // ===================================
     /*
-    In order to test the functionality of get_workspace, we for now assume forward_kinematics
-    would be properly implemented in the future and will return correct results. This version
-    only generates a fake output that is 10 times the value of the first element in config.
+    In order to test the functionality of get_workspace, we for now assume
+    forward_kinematics would be properly implemented in the future and will
+    return correct results. This version only generates a fake output that is 10
+    times the value of the first element in config.
     */
     std::vector<std::vector<double>> end_positions;
     for (int i = 0; i < configs.size(); ++i) {
-      std::vector<double> single_res(3, configs[i][0]*10);
+      std::vector<double> single_res(3, configs[i][0] * 10);
       end_positions.push_back(single_res);
     }
     return end_positions;
@@ -129,24 +120,21 @@ std::vector<std::vector<double>> Robot::forward_kinematics(
   }
 }
 
-
-
 void Robot::save2map(std::vector<std::vector<double>> &pos,
                      std::vector<std::vector<double>> &configs) {
   /*
-  param pos: the end positions computed from forward_kinematics 
+  param pos: the end positions computed from forward_kinematics
   param configs: corresponding configurations of the robotic arm
   */
 
   assert((pos.size() == configs.size()) && "Input dimension sanity check.");
-
+  this->point_cloud_.reserve(configs.size() / 2);
   for (int i = 0; i < pos.size(); ++i) {
     // this->point_cloud_[pos[i]].push_back(configs[i]);
     if (this->point_cloud_.find(pos[i]) != this->point_cloud_.end()) {
-      // std::cout << "Append new configurations to existing entries" << std::endl;
-      // print_1dVec(pos[i]);
-      // print_1dVec(configs[i]);
-      // std::cout << std::endl;
+      // std::cout << "Append new configurations to existing entries" <<
+      // std::endl; print_1dVec(pos[i]); print_1dVec(configs[i]); std::cout <<
+      // std::endl;
       this->point_cloud_[pos[i]].push_back(configs[i]);
     } else {
       // std::cout << "Creating new key-value pair" << std::endl;
@@ -158,25 +146,32 @@ void Robot::save2map(std::vector<std::vector<double>> &pos,
   }
 }
 
-// ===================================== VERSION 2 ===========================================
-void Robot::get_workspace(std::vector<std::vector<double>> configs, int nThreads, bool testing) 
-{
+// ===================================== VERSION 2
+// ===========================================
+void Robot::get_workspace(std::vector<std::vector<double>> configs,
+                          int nThreads, bool testing) {
   /*
   param configs: a 2D array (vector) that stores all possible configurations
   param nThreads: number of threads available
   */
   int num_jobs = configs.size();
   if (num_jobs < nThreads)
-    nThreads = num_jobs; // if fewer tasks than nThreads, then we use fewer number of threads
+    nThreads = num_jobs;  // if fewer tasks than nThreads, then we use fewer
+                          // number of threads
   // WorkerThread *subThr = new WorkerThread[nThreads];
   // std::vector<std::vector<double>> all_results;
   for (int i = 0; i < nThreads; ++i) {
     // slice the vector
     auto start = configs.begin() + i * (num_jobs / nThreads);
-    auto end = configs.begin() + (i + 1) * (num_jobs / nThreads);  // not including the last element
+    auto end =
+        configs.begin() +
+        (i + 1) * (num_jobs / nThreads);  // not including the last element
     // if (end == configs.begin()) end = configs.end();
-    if (end >= configs.end()) end = configs.end(); // the last batch could be smaller than regular batch
-    auto some_configs = std::vector<std::vector<double>>(start, end);  // same type as configs
+    if (end >= configs.end())
+      end =
+          configs.end();  // the last batch could be smaller than regular batch
+    auto some_configs =
+        std::vector<std::vector<double>>(start, end);  // same type as configs
     // feed to threads
     auto fut = std::async(std::launch::async, &Robot::forward_kinematics, this,
                           some_configs, testing);
@@ -198,10 +193,11 @@ void Robot::get_workspace(std::vector<std::vector<double>> configs, int nThreads
   // subThr = nullptr;
 }
 
-// ================================== UNUSED FUNCTIONS =====================================
+// ================================== UNUSED FUNCTIONS
+// =====================================
 
-// =================================== MULTITHREADING ====================================== 
-// class WorkerThread
+// =================================== MULTITHREADING
+// ====================================== class WorkerThread
 // {
 // private:
 //     enum
@@ -271,10 +267,12 @@ void Robot::get_workspace(std::vector<std::vector<double>> configs, int nThreads
 //     }
 // }
 
-// =================================== MULTITHREADING ======================================
+// =================================== MULTITHREADING
+// ======================================
 
-// =================================== VERSION 1 =========================================== 
-// void Robot::get_workspace(std::vector<std::vector<double>> configs, const int
+// =================================== VERSION 1
+// =========================================== void
+// Robot::get_workspace(std::vector<std::vector<double>> configs, const int
 // nThreads) const
 // {
 //     /*
