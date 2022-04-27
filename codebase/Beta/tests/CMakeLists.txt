@@ -36,3 +36,7 @@ add_test(NAME test_urdf3 COMMAND test_urdf3)
 # add_executable(test_ws3 MACOSX_BUNDLE test_ws3.cpp)
 # target_link_libraries(test_ws3 robot)
 # add_test(NAME test_ws3 COMMAND test_ws3)
+
+add_executable(test_ws4 MACOSX_BUNDLE test_ws4.cpp)
+target_link_libraries(test_ws4 robot)
+add_test(NAME test_ws4 COMMAND test_ws4)

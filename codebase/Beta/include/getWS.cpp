@@ -1,12 +1,87 @@
 #include "Robot.h"
+#include <algorithm>
+#include <math.h>
 
-std::vector<std::vector<double>> Robot::generate_config(int resolution) const {
-  std::vector<std::vector<double>> configs;
+bool Robot::generate_config_recursive(std::vector<std::vector<double>> &configs, std::vector<std::vector<double>> &joint_values, 
+                               std::vector<int> &indices,
+                               int resolution, int jointID, int last_joint)
+{
+  // ==================================================
+  int next_jointID = jointID + 1;
+
+  if (jointID == last_joint)
+  {
+    for (int i = 0; i < resolution; ++i)
+    {
+      std::vector<double> single_config;
+      // insert config for all previous joints
+      for (int j = 0; j < indices.size(); ++j) // jth joint; indices[j] the current config of jth joint
+      {
+        single_config.push_back(joint_values[j][indices[j]]);
+      }
+      // add the config for the existing joint
+      single_config.push_back(joint_values[last_joint][i]);
+      configs.push_back(single_config);
+    }
+    return true;
+  }
+  else if (jointID < last_joint)
+  {
+    for (int idx = 0; idx < resolution; ++idx)
+    {
+      indices[jointID] = idx;
+      // std::cout << "I'm here" << jointID << std::endl;
+      if (Robot::generate_config_recursive(configs, 
+                                           joint_values, 
+                                           indices, 
+                                           resolution, 
+                                           next_jointID, 
+                                           last_joint))
+      {
+        continue;
+      }
+      else
+      {
+        std::cout << "Something went wrong in the recursive function." << std::endl;
+      }
+    }
+    return true;
+  }
+}
+
+std::vector<std::vector<double>> Robot::generate_config(int resolution) {
+  std::vector<std::vector<double>> configs; //  resolution ^ n_joints
+  std::vector<std::vector<double>> joint_values; // n_joints * resolution
+  auto n_MovingJoints = joints_.size() - 2; // ignore the first and last joints
+  for (int i = 1; i < joints_.size() - 1; ++i)
+  {
+    double lowerb = std::min(joints_[i].joint_limits_[0], joints_[i].joint_limits_[1]);
+    double range = abs(joints_[i].joint_limits_[0] - joints_[i].joint_limits_[1]);
+    double increment = range / (double)(resolution - 1); // resolution = 5 means 4 increments
+    std::vector<double> values;
+    for (int j = 0; j < resolution; ++j)
+    {
+      values.push_back(lowerb + increment * j);
+    }
+    joint_values.push_back(values);
+  }
+  
+  std::vector<int> indices(n_MovingJoints - 1, 0); // stores values of all moveable joints except last one
+  Robot::generate_config_recursive(configs, joint_values, indices,
+                            resolution, 0, n_MovingJoints - 1);
+  std::cout << "Total number of joints: " << joints_.size() << std::endl;
+  std::cout << "Number of movable joints: " << n_MovingJoints << std::endl;
+  std::cout << "Number of movable positions per joint: " << resolution << std::endl;
+  std::cout << "Should generate " << std::pow(resolution, n_MovingJoints) << " configurations." << std::endl;
+  std::cout << "Generated " << configs.size() << " configurations." << std::endl;
+
+  assert((std::pow(resolution, n_MovingJoints) == configs.size()));
+
   return configs;
 }
 
 std::vector<std::vector<double>> Robot::forward_kinematics(
-    std::vector<std::vector<double>> configs, bool testing) const
+        std::vector<std::vector<double>> configs, bool testing) const
 {
   /*
   summary: the function takes in a batch of configurations and computes
