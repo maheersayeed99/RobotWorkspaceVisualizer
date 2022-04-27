@@ -3,13 +3,13 @@ add_executable(test_fk1 MACOSX_BUNDLE test_fk1.cpp)
 target_link_libraries(test_fk1 robot)
 add_test(NAME test_fk1 COMMAND test_fk1)
 
-add_executable(test_fk2 MACOSX_BUNDLE test_fk2.cpp)
-target_link_libraries(test_fk2 robot)
-add_test(NAME test_fk2 COMMAND test_fk2)
+# add_executable(test_fk2 MACOSX_BUNDLE test_fk2.cpp)
+# target_link_libraries(test_fk2 robot)
+# add_test(NAME test_fk2 COMMAND test_fk2)
 
-add_executable(test_fk3 MACOSX_BUNDLE test_fk3.cpp)
-target_link_libraries(test_fk3 robot)
-add_test(NAME test_fk3 COMMAND test_fk3)
+# add_executable(test_fk3 MACOSX_BUNDLE test_fk3.cpp)
+# target_link_libraries(test_fk3 robot)
+# add_test(NAME test_fk3 COMMAND test_fk3)
 
 # URDF
 add_executable(test_urdf1 MACOSX_BUNDLE test_urdf1.cpp)

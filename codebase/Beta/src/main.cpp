@@ -198,6 +198,13 @@ void ApplicationMain::RunOneStep(void) {
     optVec = robot.findClosestPoint(iptVec);
 
     if (optVec.size() > 0) {
+      vtx.push_back(optVec.at(0));
+      vtx.push_back(optVec.at(1));
+      vtx.push_back(optVec.at(2));
+      col.push_back(0);
+      col.push_back(1);
+      col.push_back(0);
+      col.push_back(1);
       std::cout << "Finding configurations:" << std::endl;
       configs = robot.point_cloud_[optVec][0];
       std::cout << "Printing Angles:" << std::endl;
