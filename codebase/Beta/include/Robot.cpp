@@ -308,12 +308,23 @@ void Robot::addToLattice(std::vector<double> coordinate) {
     ltc[idx].push_back(coordinate);
 }
 
+
+void Robot::fillPointCloud() {
+    for (auto const& pair : point_cloud_) {
+        addToLattice(pair.first);
+    }
+}
+
+
 std::vector<double> Robot::findClosestPoint(std::vector<double> iptCoordinate) {
     YsVec3 pos(iptCoordinate[0], iptCoordinate[1], iptCoordinate[2]);
     YsVec3i idx = ltc.GetBlockIndex(pos);
     std::vector<double> rslt;
     double currDist, minDist;
     minDist = findDist(ltc[idx][0], iptCoordinate);
+    
+    std::cout << idx.x() <<"   "<<idx.y() << std::endl;
+    
     for (std::vector<double> currVec : ltc[idx]) {
         currDist = findDist(currVec, iptCoordinate);
         if (currDist < minDist) {
@@ -321,6 +332,7 @@ std::vector<double> Robot::findClosestPoint(std::vector<double> iptCoordinate) {
             rslt = currVec;
         }
     }
+
     return rslt;
 }
 

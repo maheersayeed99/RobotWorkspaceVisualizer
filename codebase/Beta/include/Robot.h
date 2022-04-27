@@ -140,6 +140,7 @@ class Robot {
   void addToLattice(std::vector<double> coordinate);
   double findDist(std::vector<double> vec1, std::vector<double> vec2);
   std::vector<double> findClosestPoint(std::vector<double> iptCoordinate);
+  void fillPointCloud();
 
 };
 

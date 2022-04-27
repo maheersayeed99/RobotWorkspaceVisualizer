@@ -24,6 +24,7 @@ class ApplicationMain {
   Robot robot;
 
  public:
+  bool inputMode = false;
   ApplicationMain(int argc, char* argv[]);
   bool MustTerminate(void) const;
   void RunOneStep(void);
@@ -52,6 +53,10 @@ ApplicationMain::ApplicationMain(int argc, char* argv[]) {
       // TODO: Find a way to convert robot.point_cloud_ to vtx and col
       vtx = robot.vtx;
       col = robot.col;
+      double minmax[2][3];
+      boundingBox(minmax, vtx);
+      robot.makeLattice(minmax);
+      robot.fillPointCloud();
 
       viewTarget = YsVec3::Origin();
       lastT = std::chrono::high_resolution_clock::now();
@@ -73,6 +78,10 @@ ApplicationMain::ApplicationMain(int argc, char* argv[]) {
       // TODO: Find a way to convert robot.point_cloud_ to vtx and col
       vtx = robot.vtx;
       col = robot.col;
+      double minmax[2][3];
+      boundingBox(minmax, vtx);
+      robot.makeLattice(minmax);
+      robot.fillPointCloud();
 
       viewTarget = YsVec3::Origin();
       lastT = std::chrono::high_resolution_clock::now();
@@ -158,31 +167,71 @@ void ApplicationMain::RunOneStep(void) {
   double dt = (double)deltaTinMS / 1000000.0;
   lastT = std::chrono::high_resolution_clock::now();
 
-  auto key = FsInkey();
+  if (inputMode) {
+    std::vector<double> iptVec, optVec, configs;
+    double temp;
+    std::cout << "Enter x-coordinate: ";
+    std::cin >> temp;
+    iptVec.push_back(temp);
+    std::cout << std::endl;
 
-  if (FSKEY_ESC == key) {
-    terminate = true;
+    std::cout << "Enter y-coordinate: ";
+    std::cin >> temp;
+    iptVec.push_back(temp);
+    std::cout << std::endl;
+
+    std::cout << "Enter z-coordinate: ";
+    std::cin >> temp;
+    iptVec.push_back(temp);
+    std::cout << std::endl;
+
+    std::cout << "Finding closest point:" << std::endl;
+    optVec = robot.findClosestPoint(iptVec);
+
+    if (optVec.size() > 0) {
+      std::cout << "Finding configurations:" << std::endl;
+      configs = robot.point_cloud_[optVec][0];
+      std::cout << "Printing Angles:" << std::endl;
+      for (double currConfig : configs) {
+        std::cout << currConfig << std::endl;
+      }
+    } else {
+      std::cout << "Point not in Workspace" << std::endl;
+    }
+
+    inputMode = false;
   }
 
-  if (FsGetKeyState(FSKEY_LEFT)) {
-    YsMatrix3x3 rot;
-    rot.RotateXZ(dt * PI / 6);
-    viewRotation = rot * viewRotation;
-  }
-  if (FsGetKeyState(FSKEY_RIGHT)) {
-    YsMatrix3x3 rot;
-    rot.RotateXZ(-dt * PI / 6);
-    viewRotation = rot * viewRotation;
-  }
-  if (FsGetKeyState(FSKEY_UP)) {
-    YsMatrix3x3 rot;
-    rot.RotateYZ(-dt * PI / 6);
-    viewRotation = rot * viewRotation;
-  }
-  if (FsGetKeyState(FSKEY_DOWN)) {
-    YsMatrix3x3 rot;
-    rot.RotateYZ(dt * PI / 6);
-    viewRotation = rot * viewRotation;
+  else {
+    auto key = FsInkey();
+    if (FSKEY_ENTER == key) {
+      inputMode = true;
+    }
+
+    if (FSKEY_ESC == key) {
+      terminate = true;
+    }
+
+    if (FsGetKeyState(FSKEY_LEFT)) {
+      YsMatrix3x3 rot;
+      rot.RotateXZ(dt * PI / 6);
+      viewRotation = rot * viewRotation;
+    }
+    if (FsGetKeyState(FSKEY_RIGHT)) {
+      YsMatrix3x3 rot;
+      rot.RotateXZ(-dt * PI / 6);
+      viewRotation = rot * viewRotation;
+    }
+    if (FsGetKeyState(FSKEY_UP)) {
+      YsMatrix3x3 rot;
+      rot.RotateYZ(-dt * PI / 6);
+      viewRotation = rot * viewRotation;
+    }
+    if (FsGetKeyState(FSKEY_DOWN)) {
+      YsMatrix3x3 rot;
+      rot.RotateYZ(dt * PI / 6);
+      viewRotation = rot * viewRotation;
+    }
   }
 }
 
