@@ -13,9 +13,9 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
 )
 
-add_subdirectory(../../../public/src ${CMAKE_BINARY_DIR}/public)
-add_subdirectory(../../../MMLPlayer/ym2612 ${CMAKE_BINARY_DIR}/ym2612)
-add_subdirectory(../../../MMLPlayer/mmlplayer ${CMAKE_BINARY_DIR}/mmlplayer)
+add_subdirectory(../../public/src ${CMAKE_BINARY_DIR}/public)
+#add_subdirectory(../../../MMLPlayer/ym2612 ${CMAKE_BINARY_DIR}/ym2612)
+#add_subdirectory(../../../MMLPlayer/mmlplayer ${CMAKE_BINARY_DIR}/mmlplayer)
 add_subdirectory(include)
 add_subdirectory(tests)
 
