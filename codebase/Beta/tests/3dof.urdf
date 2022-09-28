@@ -23,20 +23,14 @@
         <child link="link2"/>
         <origin rpy="0 0 0" xyz="1 0 0"/>
         <axis rpy="0 0 0" xyz="0 1 0"/>
-        <limit lower="-3.14159" upper="3.14159" />
-    </joint>
-
-    <joint name="joint3" type="continuous">
-        <parent link="link2"/>
-        <child link="link3"/>
-        <origin rpy="0 0 0" xyz="1 0 0"/>
-        <axis rpy="0 0 0" xyz="1 0 0"/>
-        <limit lower="-3.14159" upper="3.14159" />
+        <limit lower="-3" upper="3"/>
+        <!--limit lower="-3.14159" upper="3.14159" /-->
+        
     </joint>
 
 
     <joint name="ee_joint" type="fixed">
-        <parent link="link3"/>
+        <parent link="link2"/>
         <child link="ee_link"/>
         <origin rpy="0 0 0" xyz="1 0 0"/>
         <axis rpy="0 0 0" xyz="1 0 0"/>
