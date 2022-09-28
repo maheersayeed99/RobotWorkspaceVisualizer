@@ -1,5 +1,8 @@
 # 24783 Group Project - NamingSoHard
 
+<img src="/Screen Shot 2022-09-27 at 11.41.56 PM.png" alt="Employee data" title="Employee Data title" width = "600"/>
+
+
 ##Alpha version
 
 Note: pcd_viewer is a ros package, independent of all other codes
